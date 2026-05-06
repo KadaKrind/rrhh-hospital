@@ -57,11 +57,13 @@ async function abrirModalNuevaPlanilla() {
         fetch(API_CARGOS_PL).then(r => r.json()).catch(() => [])
     ]);
 
+    window._cargosPL = cargos;
+
     const optsEmp = empleados.map(e =>
         `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}">${e.nombre} ${e.apellido}</option>`
     ).join('');
     const optsCar = cargos.map(c =>
-        `<option value="${c.id}" data-descripcion="${c.descripcion ?? ''}">${c.nombre}</option>`
+        `<option value="${c.id}">${c.nombre}</option>`
     ).join('');
 
     openModal(`
@@ -127,8 +129,9 @@ function autocompletarSueldo(select) {
 
 function autocompletarCargo(select) {
     const form = select.closest('form');
-    const opt = select.options[select.selectedIndex];
-    form.cargodesc.value = opt.dataset.descripcion || '';
+    const id = parseInt(select.value);
+    const cargo = (window._cargosPL || []).find(c => c.id === id);
+    form.cargodesc.value = cargo ? cargo.descripcion : '';
 }
 
 function calcularNeto(form) {
@@ -170,16 +173,17 @@ async function abrirModalEditarPlanilla(id) {
         fetch(API_CARGOS_PL).then(r => r.json()).catch(() => [])
     ]);
 
+    window._cargosPL = cargos;
+
     const optsEmp = empleados.map(e =>
         `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}" ${e.id === p.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`
     ).join('');
     const optsCar = cargos.map(c =>
-        `<option value="${c.id}" data-descripcion="${c.descripcion ?? ''}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
+        `<option value="${c.id}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
     ).join('');
 
-    // Precarga descripcion del cargo seleccionado
     const cargoSeleccionado = cargos.find(c => c.id === p.cargoId);
-    const descCargo = cargoSeleccionado?.descripcion ?? '';
+    const descCargo = cargoSeleccionado ? cargoSeleccionado.descripcion : '';
 
     openModal(`
     <h2>Editar Planilla</h2>
