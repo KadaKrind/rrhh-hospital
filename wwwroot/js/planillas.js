@@ -60,7 +60,9 @@ async function abrirModalNuevaPlanilla() {
     const optsEmp = empleados.map(e =>
         `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}">${e.nombre} ${e.apellido}</option>`
     ).join('');
-    const optsCar = cargos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    const optsCar = cargos.map(c =>
+        `<option value="${c.id}" data-descripcion="${c.descripcion ?? ''}">${c.nombre}</option>`
+    ).join('');
 
     openModal(`
     <h2>Nueva Planilla</h2>
@@ -78,9 +80,14 @@ async function abrirModalNuevaPlanilla() {
       </div>
       <div class="form-group">
         <label>Cargo</label>
-        <select name="cargoId" required>
+        <select name="cargoId" required onchange="autocompletarCargo(this)">
           <option value="">-- Seleccionar --</option>${optsCar}
         </select>
+      </div>
+      <div class="form-group">
+        <label>Descripción del Cargo</label>
+        <input type="text" name="cargodesc" readonly placeholder="Se llena al seleccionar cargo"
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
@@ -116,6 +123,12 @@ function autocompletarSueldo(select) {
     const sueldo = parseFloat(opt.dataset.sueldo) || 0;
     form.sueldoBase.value = sueldo.toFixed(2);
     calcularNeto(form);
+}
+
+function autocompletarCargo(select) {
+    const form = select.closest('form');
+    const opt = select.options[select.selectedIndex];
+    form.cargodesc.value = opt.dataset.descripcion || '';
 }
 
 function calcularNeto(form) {
@@ -161,8 +174,12 @@ async function abrirModalEditarPlanilla(id) {
         `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}" ${e.id === p.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`
     ).join('');
     const optsCar = cargos.map(c =>
-        `<option value="${c.id}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
+        `<option value="${c.id}" data-descripcion="${c.descripcion ?? ''}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
     ).join('');
+
+    // Precarga descripcion del cargo seleccionado
+    const cargoSeleccionado = cargos.find(c => c.id === p.cargoId);
+    const descCargo = cargoSeleccionado?.descripcion ?? '';
 
     openModal(`
     <h2>Editar Planilla</h2>
@@ -175,9 +192,14 @@ async function abrirModalEditarPlanilla(id) {
       </div>
       <div class="form-group">
         <label>Cargo</label>
-        <select name="cargoId" required>
+        <select name="cargoId" required onchange="autocompletarCargo(this)">
           <option value="">-- Seleccionar --</option>${optsCar}
         </select>
+      </div>
+      <div class="form-group">
+        <label>Descripción del Cargo</label>
+        <input type="text" name="cargodesc" value="${descCargo}" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
