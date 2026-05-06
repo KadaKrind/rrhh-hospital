@@ -1,4 +1,4 @@
-﻿const API_DB_EMPLEADOS = https://rrhh-hospital-production.up.railway.app/api/empleados';
+﻿const API_DB_EMPLEADOS = 'https://rrhh-hospital-production.up.railway.app/api/empleados';
 const API_DB_CONTRATOS = 'https://rrhh-hospital-production.up.railway.app/api/contratos';
 const API_DB_PLANILLAS = 'https://rrhh-hospital-production.up.railway.app/api/planillas';
 const API_DB_DESPIDOS = 'https://rrhh-hospital-production.up.railway.app/api/despidos';
