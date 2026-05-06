@@ -1,4 +1,5 @@
 ﻿const API_CONTRATOS = 'https://rrhh-hospital-production.up.railway.app/api/contratos';
+const API_EMPLEADOS_CON = 'https://rrhh-hospital-production.up.railway.app/api/empleados';
 
 async function loadContratos() {
     const contratos = await fetch(API_CONTRATOS).then(r => r.json()).catch(() => []);
@@ -31,7 +32,7 @@ async function loadContratos() {
                 <td>${c.fechaInicio ? c.fechaInicio.split('T')[0] : '-'}</td>
                 <td>${c.fechaFin ? c.fechaFin.split('T')[0] : 'Vigente'}</td>
                 <td>
-                  <button class="btn btn-sm btn-secondary" onclick='abrirModalEditarContrato(${JSON.stringify(c)})'>Editar</button>
+                  <button class="btn btn-sm btn-secondary" onclick="abrirModalEditarContrato(${c.id})">Editar</button>
                   <button class="btn btn-sm btn-danger" onclick="eliminarContrato(${c.id})">Eliminar</button>
                 </td>
               </tr>
@@ -45,7 +46,12 @@ async function loadContratos() {
 }
 
 async function abrirModalNuevoContrato() {
-    const codigo = await generarSiguienteCodigo(API_CONTRATOS, 'codigoContrato', 'CON');
+    const [codigo, empleados] = await Promise.all([
+        generarSiguienteCodigo(API_CONTRATOS, 'codigoContrato', 'CON'),
+        fetch(API_EMPLEADOS_CON).then(r => r.json()).catch(() => [])
+    ]);
+
+    const optsEmp = empleados.map(e => `<option value="${e.id}">${e.nombre} ${e.apellido}</option>`).join('');
 
     openModal(`
     <h2>Nuevo Contrato</h2>
@@ -56,8 +62,10 @@ async function abrirModalNuevoContrato() {
                style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
-        <label>Empleado (nombre completo)</label>
-        <input type="text" name="empleado" placeholder="Ej: Juan Perez" required />
+        <label>Empleado</label>
+        <select name="empleadoId" required>
+          <option value="">-- Seleccionar --</option>${optsEmp}
+        </select>
       </div>
       <div class="form-group">
         <label>Tipo de Contrato</label>
@@ -66,6 +74,9 @@ async function abrirModalNuevoContrato() {
           <option value="Indefinido">Indefinido</option>
           <option value="Temporal">Temporal</option>
           <option value="Por Obra">Por Obra</option>
+          <option value="Item">Item</option>
+          <option value="Eventual">Eventual</option>
+          <option value="Consultoría">Consultoría</option>
         </select>
       </div>
       <div class="form-group">
@@ -89,7 +100,7 @@ async function guardarContrato(e) {
     const form = e.target;
     const data = {
         codigoContrato: form.codigoContrato.value,
-        empleado: form.empleado.value,
+        empleadoId: parseInt(form.empleadoId.value),
         tipoContrato: form.tipoContrato.value,
         fechaInicio: form.fechaInicio.value,
         fechaFin: form.fechaFin.value || null
@@ -100,13 +111,25 @@ async function guardarContrato(e) {
         body: JSON.stringify(data)
     });
     if (res.ok) { closeModal(); paginasCargadas.delete('contratos'); loadContratos(); }
-    else alert('Error al guardar el contrato');
+    else {
+        const err = await res.json().catch(() => ({}));
+        alert('Error: ' + (err.mensaje || 'No se pudo guardar el contrato'));
+    }
 }
 
-function abrirModalEditarContrato(c) {
+async function abrirModalEditarContrato(id) {
+    const [c, empleados] = await Promise.all([
+        fetch(`${API_CONTRATOS}/${id}`).then(r => r.json()),
+        fetch(API_EMPLEADOS_CON).then(r => r.json()).catch(() => [])
+    ]);
+
+    const optsEmp = empleados.map(e => `<option value="${e.id}" ${e.id === c.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`).join('');
+    const tipos = ['Indefinido', 'Temporal', 'Por Obra', 'Item', 'Eventual', 'Consultoría'];
+    const optsTipo = tipos.map(t => `<option value="${t}" ${c.tipoContrato === t ? 'selected' : ''}>${t}</option>`).join('');
+
     openModal(`
     <h2>Editar Contrato</h2>
-    <form onsubmit="actualizarContrato(event, ${c.id})">
+    <form onsubmit="actualizarContrato(event, ${id})">
       <div class="form-group">
         <label>Código</label>
         <input type="text" name="codigoContrato" value="${c.codigoContrato}" readonly
@@ -114,15 +137,13 @@ function abrirModalEditarContrato(c) {
       </div>
       <div class="form-group">
         <label>Empleado</label>
-        <input type="text" name="empleado" value="${c.empleado || ''}" required />
+        <select name="empleadoId" required>
+          <option value="">-- Seleccionar --</option>${optsEmp}
+        </select>
       </div>
       <div class="form-group">
         <label>Tipo de Contrato</label>
-        <select name="tipoContrato" required>
-          <option value="Indefinido" ${c.tipoContrato === 'Indefinido' ? 'selected' : ''}>Indefinido</option>
-          <option value="Temporal"   ${c.tipoContrato === 'Temporal' ? 'selected' : ''}>Temporal</option>
-          <option value="Por Obra"   ${c.tipoContrato === 'Por Obra' ? 'selected' : ''}>Por Obra</option>
-        </select>
+        <select name="tipoContrato" required>${optsTipo}</select>
       </div>
       <div class="form-group">
         <label>Fecha Inicio</label>
@@ -145,8 +166,7 @@ async function actualizarContrato(e, id) {
     const form = e.target;
     const data = {
         id,
-        codigoContrato: form.codigoContrato.value,
-        empleado: form.empleado.value,
+        empleadoId: parseInt(form.empleadoId.value),
         tipoContrato: form.tipoContrato.value,
         fechaInicio: form.fechaInicio.value,
         fechaFin: form.fechaFin.value || null

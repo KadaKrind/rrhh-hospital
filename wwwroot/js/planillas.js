@@ -1,4 +1,6 @@
 ﻿const API_PLANILLAS = 'https://rrhh-hospital-production.up.railway.app/api/planillas';
+const API_EMPLEADOS_PL = 'https://rrhh-hospital-production.up.railway.app/api/empleados';
+const API_CARGOS_PL = 'https://rrhh-hospital-production.up.railway.app/api/cargos';
 
 async function loadPlanillas() {
     const planillas = await fetch(API_PLANILLAS).then(r => r.json()).catch(() => []);
@@ -45,35 +47,55 @@ async function loadPlanillas() {
       </table>
     </div>
   `;
+    makeTableSortable('tabla-planillas');
 }
 
-function abrirModalNuevaPlanilla() {
+async function abrirModalNuevaPlanilla() {
+    const [codigo, empleados, cargos] = await Promise.all([
+        generarSiguienteCodigo(API_PLANILLAS, 'codigoPlanilla', 'PLA'),
+        fetch(API_EMPLEADOS_PL).then(r => r.json()).catch(() => []),
+        fetch(API_CARGOS_PL).then(r => r.json()).catch(() => [])
+    ]);
+
+    const optsEmp = empleados.map(e => `<option value="${e.id}">${e.nombre} ${e.apellido}</option>`).join('');
+    const optsCar = cargos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+
     openModal(`
     <h2>Nueva Planilla</h2>
     <form onsubmit="guardarPlanilla(event)">
       <div class="form-group">
         <label>Código</label>
-        <input type="text" name="codigoPlanilla" placeholder="Ej: PLA-016" required />
+        <input type="text" name="codigoPlanilla" value="${codigo}" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
-        <label>Empleado (nombre completo)</label>
-        <input type="text" name="empleado" placeholder="Ej: Juan Perez" required />
+        <label>Empleado</label>
+        <select name="empleadoId" required>
+          <option value="">-- Seleccionar --</option>${optsEmp}
+        </select>
       </div>
       <div class="form-group">
         <label>Cargo</label>
-        <input type="text" name="cargo" placeholder="Ej: Médico General" />
+        <select name="cargoId" required>
+          <option value="">-- Seleccionar --</option>${optsCar}
+        </select>
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
-        <input type="number" name="sueldoBase" step="0.01" min="0" required />
+        <input type="number" name="sueldoBase" step="0.01" min="0" required oninput="calcularNeto(this.form)" />
       </div>
       <div class="form-group">
         <label>Descuentos (Bs.)</label>
-        <input type="number" name="descuentos" step="0.01" min="0" value="0" required />
+        <input type="number" name="descuentos" step="0.01" min="0" value="0" required oninput="calcularNeto(this.form)" />
       </div>
       <div class="form-group">
-        <label>Gestión (año)</label>
-        <input type="text" name="gestion" placeholder="Ej: 2026" required />
+        <label>Sueldo Neto (Bs.)</label>
+        <input type="number" name="sueldoNeto" step="0.01" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
+      </div>
+      <div class="form-group">
+        <label>Gestión (ej: 2026-1)</label>
+        <input type="text" name="gestion" placeholder="Ej: 2026-1" required />
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
@@ -83,6 +105,12 @@ function abrirModalNuevaPlanilla() {
   `);
 }
 
+function calcularNeto(form) {
+    const base = parseFloat(form.sueldoBase.value) || 0;
+    const desc = parseFloat(form.descuentos.value) || 0;
+    form.sueldoNeto.value = (base - desc).toFixed(2);
+}
+
 async function guardarPlanilla(e) {
     e.preventDefault();
     const form = e.target;
@@ -90,8 +118,8 @@ async function guardarPlanilla(e) {
     const descuentos = parseFloat(form.descuentos.value);
     const data = {
         codigoPlanilla: form.codigoPlanilla.value,
-        empleado: form.empleado.value,
-        cargo: form.cargo.value,
+        empleadoId: parseInt(form.empleadoId.value),
+        cargoId: parseInt(form.cargoId.value),
         sueldoBase,
         descuentos,
         sueldoNeto: sueldoBase - descuentos,
@@ -103,33 +131,53 @@ async function guardarPlanilla(e) {
         body: JSON.stringify(data)
     });
     if (res.ok) { closeModal(); paginasCargadas.delete('planillas'); loadPlanillas(); }
-    else alert('Error al guardar la planilla');
+    else {
+        const err = await res.json().catch(() => ({}));
+        alert('Error: ' + (err.mensaje || 'No se pudo guardar la planilla'));
+    }
 }
 
 async function abrirModalEditarPlanilla(id) {
-    const p = await fetch(`${API_PLANILLAS}/${id}`).then(r => r.json());
+    const [p, empleados, cargos] = await Promise.all([
+        fetch(`${API_PLANILLAS}/${id}`).then(r => r.json()),
+        fetch(API_EMPLEADOS_PL).then(r => r.json()).catch(() => []),
+        fetch(API_CARGOS_PL).then(r => r.json()).catch(() => [])
+    ]);
+
+    const optsEmp = empleados.map(e =>
+        `<option value="${e.id}" ${e.id === p.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`
+    ).join('');
+    const optsCar = cargos.map(c =>
+        `<option value="${c.id}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
+    ).join('');
+
     openModal(`
     <h2>Editar Planilla</h2>
     <form onsubmit="actualizarPlanilla(event, ${id})">
       <div class="form-group">
-        <label>Código</label>
-        <input type="text" name="codigoPlanilla" value="${p.codigoPlanilla}" required />
-      </div>
-      <div class="form-group">
         <label>Empleado</label>
-        <input type="text" name="empleado" value="${p.empleado}" required />
+        <select name="empleadoId" required>
+          <option value="">-- Seleccionar --</option>${optsEmp}
+        </select>
       </div>
       <div class="form-group">
         <label>Cargo</label>
-        <input type="text" name="cargo" value="${p.cargo || ''}" />
+        <select name="cargoId" required>
+          <option value="">-- Seleccionar --</option>${optsCar}
+        </select>
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
-        <input type="number" name="sueldoBase" step="0.01" value="${p.sueldoBase}" required />
+        <input type="number" name="sueldoBase" step="0.01" value="${p.sueldoBase}" required oninput="calcularNeto(this.form)" />
       </div>
       <div class="form-group">
         <label>Descuentos (Bs.)</label>
-        <input type="number" name="descuentos" step="0.01" value="${p.descuentos}" required />
+        <input type="number" name="descuentos" step="0.01" value="${p.descuentos}" required oninput="calcularNeto(this.form)" />
+      </div>
+      <div class="form-group">
+        <label>Sueldo Neto (Bs.)</label>
+        <input type="number" name="sueldoNeto" step="0.01" value="${p.sueldoNeto}" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
         <label>Gestión</label>
@@ -150,9 +198,8 @@ async function actualizarPlanilla(e, id) {
     const descuentos = parseFloat(form.descuentos.value);
     const data = {
         id,
-        codigoPlanilla: form.codigoPlanilla.value,
-        empleado: form.empleado.value,
-        cargo: form.cargo.value,
+        empleadoId: parseInt(form.empleadoId.value),
+        cargoId: parseInt(form.cargoId.value),
         sueldoBase,
         descuentos,
         sueldoNeto: sueldoBase - descuentos,
