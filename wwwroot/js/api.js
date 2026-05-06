@@ -1,4 +1,4 @@
-﻿const API_BASE = 'http://localhost:5205/api';
+﻿const API_BASE = 'https://rrhh-hospital-production.up.railway.app/api';
 
 const api = {
     get: async (endpoint) => {

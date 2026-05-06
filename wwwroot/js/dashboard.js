@@ -1,10 +1,10 @@
-﻿const API_DB_EMPLEADOS = 'http://localhost:5205/api/empleados';
-const API_DB_CONTRATOS = 'http://localhost:5205/api/contratos';
-const API_DB_PLANILLAS = 'http://localhost:5205/api/planillas';
-const API_DB_DESPIDOS = 'http://localhost:5205/api/despidos';
-const API_DB_TURNOS = 'http://localhost:5205/api/turnos';
-const API_DB_DEPARTAMENTOS = 'http://localhost:5205/api/departamentos';
-const API_DB_MIS = 'http://localhost:5205/api/MIS';
+﻿const API_DB_EMPLEADOS = https://rrhh-hospital-production.up.railway.app/api/empleados';
+const API_DB_CONTRATOS = 'https://rrhh-hospital-production.up.railway.app/api/contratos';
+const API_DB_PLANILLAS = 'https://rrhh-hospital-production.up.railway.app/api/planillas';
+const API_DB_DESPIDOS = 'https://rrhh-hospital-production.up.railway.app/api/despidos';
+const API_DB_TURNOS = 'https://rrhh-hospital-production.up.railway.app/api/turnos';
+const API_DB_DEPARTAMENTOS = 'https://rrhh-hospital-production.up.railway.app/api/departamentos';
+const API_DB_MIS = 'https://rrhh-hospital-production.up.railway.app/api/MIS';
 
 async function loadDashboard() {
     const [empleados, contratos, planillas, despidos, turnos, deptos,

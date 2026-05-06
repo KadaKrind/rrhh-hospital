@@ -1,4 +1,4 @@
-﻿const API_DEPARTAMENTOS = 'http://localhost:5205/api/departamentos';
+﻿const API_DEPARTAMENTOS = 'https://rrhh-hospital-production.up.railway.app/api/departamentos';
 
 async function loadDepartamentos() {
     const departamentos = await fetch(API_DEPARTAMENTOS).then(r => r.json()).catch(() => []);

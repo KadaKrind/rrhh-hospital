@@ -1,5 +1,5 @@
-﻿const API_EMPLEADOS = 'http://localhost:5205/api/empleados';
-const API_MIS = 'http://localhost:5205/api/MIS';
+﻿const API_EMPLEADOS = 'https://rrhh-hospital-production.up.railway.app/api/empleados';
+const API_MIS = 'https://rrhh-hospital-production.up.railway.app/api/MIS';
 
 async function loadEmpleados() {
     const [detalle, cargos] = await Promise.all([

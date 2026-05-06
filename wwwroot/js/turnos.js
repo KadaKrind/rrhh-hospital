@@ -1,4 +1,4 @@
-﻿const API_TURNOS = 'http://localhost:5205/api/turnos';
+﻿const API_TURNOS = 'https://rrhh-hospital-production.up.railway.app/api/turnos';
 
 async function loadTurnos() {
     const turnos = await fetch(API_TURNOS).then(r => r.json()).catch(() => []);

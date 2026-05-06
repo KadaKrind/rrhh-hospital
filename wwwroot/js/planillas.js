@@ -1,4 +1,4 @@
-﻿const API_PLANILLAS = 'http://localhost:5205/api/planillas';
+﻿const API_PLANILLAS = 'https://rrhh-hospital-production.up.railway.app/api/planillas';
 
 async function loadPlanillas() {
     const planillas = await fetch(API_PLANILLAS).then(r => r.json()).catch(() => []);

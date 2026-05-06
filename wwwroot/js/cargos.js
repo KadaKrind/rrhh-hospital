@@ -1,4 +1,4 @@
-﻿const API_CARGOS = 'http://localhost:5205/api/cargos';
+﻿const API_CARGOS = 'https://rrhh-hospital-production.up.railway.app/api/cargos';
 
 async function loadCargos() {
     const cargos = await fetch(API_CARGOS).then(r => r.json()).catch(() => []);

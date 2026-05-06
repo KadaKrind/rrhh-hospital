@@ -1,4 +1,4 @@
-﻿const API_DESPIDOS = 'http://localhost:5205/api/despidos';
+﻿const API_DESPIDOS = 'https://rrhh-hospital-production.up.railway.app/api/despidos';
 
 async function loadDespidos() {
     const despidos = await fetch(API_DESPIDOS).then(r => r.json()).catch(() => []);

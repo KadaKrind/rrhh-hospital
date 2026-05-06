@@ -1,7 +1,7 @@
-﻿const API_ASIGNACIONES = 'http://localhost:5205/api/asignaciones';
-const API_EMPLEADOS_AS = 'http://localhost:5205/api/empleados';
-const API_TURNOS_AS = 'http://localhost:5205/api/turnos';
-const API_DEPTOS_AS = 'http://localhost:5205/api/departamentos';
+﻿const API_ASIGNACIONES = 'https://rrhh-hospital-production.up.railway.app/api/asignaciones';
+const API_EMPLEADOS_AS = 'https://rrhh-hospital-production.up.railway.app/api/empleados';
+const API_TURNOS_AS = 'https://rrhh-hospital-production.up.railway.app/api/turnos';
+const API_DEPTOS_AS = 'https://rrhh-hospital-production.up.railway.app/api/departamentos';
 
 async function loadAsignaciones() {
     const [asignaciones, empleados, turnos, deptos] = await Promise.all([

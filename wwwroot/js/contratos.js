@@ -1,4 +1,4 @@
-﻿const API_CONTRATOS = 'http://localhost:5205/api/contratos';
+﻿const API_CONTRATOS = 'https://rrhh-hospital-production.up.railway.app/api/contratos';
 
 async function loadContratos() {
     const contratos = await fetch(API_CONTRATOS).then(r => r.json()).catch(() => []);
