@@ -57,7 +57,9 @@ async function abrirModalNuevaPlanilla() {
         fetch(API_CARGOS_PL).then(r => r.json()).catch(() => [])
     ]);
 
-    const optsEmp = empleados.map(e => `<option value="${e.id}">${e.nombre} ${e.apellido}</option>`).join('');
+    const optsEmp = empleados.map(e =>
+        `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}">${e.nombre} ${e.apellido}</option>`
+    ).join('');
     const optsCar = cargos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
 
     openModal(`
@@ -70,7 +72,7 @@ async function abrirModalNuevaPlanilla() {
       </div>
       <div class="form-group">
         <label>Empleado</label>
-        <select name="empleadoId" required>
+        <select name="empleadoId" required onchange="autocompletarSueldo(this)">
           <option value="">-- Seleccionar --</option>${optsEmp}
         </select>
       </div>
@@ -82,11 +84,14 @@ async function abrirModalNuevaPlanilla() {
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
-        <input type="number" name="sueldoBase" step="0.01" min="0" required oninput="calcularNeto(this.form)" />
+        <input type="number" name="sueldoBase" step="0.01" min="0" required
+               oninput="calcularNeto(this.form)" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
         <label>Descuentos (Bs.)</label>
-        <input type="number" name="descuentos" step="0.01" min="0" value="0" required oninput="calcularNeto(this.form)" />
+        <input type="number" name="descuentos" step="0.01" min="0" value="0"
+               required oninput="calcularNeto(this.form)" />
       </div>
       <div class="form-group">
         <label>Sueldo Neto (Bs.)</label>
@@ -103,6 +108,14 @@ async function abrirModalNuevaPlanilla() {
       </div>
     </form>
   `);
+}
+
+function autocompletarSueldo(select) {
+    const form = select.closest('form');
+    const opt = select.options[select.selectedIndex];
+    const sueldo = parseFloat(opt.dataset.sueldo) || 0;
+    form.sueldoBase.value = sueldo.toFixed(2);
+    calcularNeto(form);
 }
 
 function calcularNeto(form) {
@@ -145,7 +158,7 @@ async function abrirModalEditarPlanilla(id) {
     ]);
 
     const optsEmp = empleados.map(e =>
-        `<option value="${e.id}" ${e.id === p.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`
+        `<option value="${e.id}" data-sueldo="${e.salarioBase ?? 0}" ${e.id === p.empleadoId ? 'selected' : ''}>${e.nombre} ${e.apellido}</option>`
     ).join('');
     const optsCar = cargos.map(c =>
         `<option value="${c.id}" ${c.id === p.cargoId ? 'selected' : ''}>${c.nombre}</option>`
@@ -156,7 +169,7 @@ async function abrirModalEditarPlanilla(id) {
     <form onsubmit="actualizarPlanilla(event, ${id})">
       <div class="form-group">
         <label>Empleado</label>
-        <select name="empleadoId" required>
+        <select name="empleadoId" required onchange="autocompletarSueldo(this)">
           <option value="">-- Seleccionar --</option>${optsEmp}
         </select>
       </div>
@@ -168,11 +181,14 @@ async function abrirModalEditarPlanilla(id) {
       </div>
       <div class="form-group">
         <label>Sueldo Base (Bs.)</label>
-        <input type="number" name="sueldoBase" step="0.01" value="${p.sueldoBase}" required oninput="calcularNeto(this.form)" />
+        <input type="number" name="sueldoBase" step="0.01" value="${p.sueldoBase}" required
+               oninput="calcularNeto(this.form)" readonly
+               style="background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;" />
       </div>
       <div class="form-group">
         <label>Descuentos (Bs.)</label>
-        <input type="number" name="descuentos" step="0.01" value="${p.descuentos}" required oninput="calcularNeto(this.form)" />
+        <input type="number" name="descuentos" step="0.01" value="${p.descuentos}"
+               required oninput="calcularNeto(this.form)" />
       </div>
       <div class="form-group">
         <label>Sueldo Neto (Bs.)</label>
