@@ -13,11 +13,11 @@ builder.Services.AddSwaggerGen();
 // CORS para que el frontend pueda llamar a la API
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
@@ -29,7 +29,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();                // <- CORS
+app.UseCors("AllowAll");                // <- CORS
 app.UseDefaultFiles();        // <- busca index.html en wwwroot
 app.UseStaticFiles();         // <- sirve archivos de wwwroot
 app.UseHttpsRedirection();
