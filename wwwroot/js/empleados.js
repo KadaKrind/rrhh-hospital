@@ -4,7 +4,7 @@ const API_MIS = 'https://rrhh-hospital-production.up.railway.app/api/MIS';
 async function loadEmpleados() {
     const [detalle, cargos] = await Promise.all([
         fetch(`${API_MIS}/empleados-activos-detalle`).then(r => r.json()).catch(() => []),
-        fetch('http://localhost:5205/api/cargos').then(r => r.json()).catch(() => [])
+        fetch('https://rrhh-hospital-production.up.railway.app/api/cargos').then(r => r.json()).catch(() => [])
     ]);
 
     const container = document.getElementById('page-empleados');
