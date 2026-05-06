@@ -57,6 +57,12 @@
             </nav>
 
             <div class="sidebar-footer">
+                <a href="https://rrhh-hospital-production.up.railway.app/swagger"
+                   target="_blank"
+                   class="nav-item"
+                   style="margin-bottom:8px;text-decoration:none;display:flex;align-items:center;gap:8px;">
+                    <span class="nav-icon">🔗</span> Swagger API
+                </a>
                 <div class="user-info">
                     <div class="user-avatar">A</div>
                     <div>
@@ -130,11 +136,9 @@
     <script src="js/turnos.js"></script>
 
     <script>
-  // Fecha en topbar
-  document.getElementById('topbar-date').textContent =
-    new Date().toLocaleDateString('es-BO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        document.getElementById('topbar-date').textContent =
+            new Date().toLocaleDateString('es-BO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Navegación entre páginas
         const pages = {
             dashboard: { title: 'Dashboard', subtitle: 'Resumen general del sistema' },
             empleados: { title: 'Empleados', subtitle: 'Gestión del personal' },
@@ -174,7 +178,6 @@
             }
         }
 
-        // Modal helpers
         function openModal(html) {
             document.getElementById('modal-content').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('open');
@@ -186,7 +189,6 @@
             if (e.target === this) closeModal();
         });
 
-        // Carga inicial solo dashboard
         paginasCargadas.add('dashboard');
         loadDashboard();
     </script>
