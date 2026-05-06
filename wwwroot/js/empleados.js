@@ -91,6 +91,7 @@ async function verDetalleEmpleado(codigo) {
 
 async function abrirModalNuevoEmpleado() {
     const codigo = await generarSiguienteCodigo(API_EMPLEADOS, 'codigoEmpleado', 'EMP');
+    const cargos = await fetch('https://rrhh-hospital-production.up.railway.app/api/cargos').then(r => r.json()).catch(() => []);
 
     openModal(`
     <h2>Nuevo Empleado</h2>
@@ -125,6 +126,17 @@ async function abrirModalNuevoEmpleado() {
         <input type="date" name="fechaIngreso" required />
       </div>
       <div class="form-group">
+        <label>Fecha de Contratación</label>
+        <input type="date" name="fechaContratacion" required />
+      </div>
+      <div class="form-group">
+        <label>Cargo</label>
+        <select name="cargoId" required>
+          <option value="">Seleccionar cargo...</option>
+          ${cargos.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
         <label>Salario Base (Bs.)</label>
         <input type="number" name="salarioBase" step="0.01" min="0" required />
       </div>
@@ -147,7 +159,9 @@ async function guardarEmpleado(e) {
         email: form.email.value,
         telefono: form.telefono.value,
         fechaIngreso: form.fechaIngreso.value,
+        fechaContratacion: form.fechaContratacion.value,
         salarioBase: parseFloat(form.salarioBase.value),
+        cargoId: parseInt(form.cargoId.value),
         estado: 'Activo'
     };
     const res = await fetch(API_EMPLEADOS, {
