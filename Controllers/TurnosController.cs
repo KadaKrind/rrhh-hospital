@@ -18,6 +18,7 @@ public class TurnosController : ControllerBase
         var turnos = await _db.Turnos
             .Where(t => t.Estado == "Activo")
             .Select(t => new {
+                t.Id,
                 t.CodigoTurno,
                 t.Descripcion,
                 t.HoraInicio,

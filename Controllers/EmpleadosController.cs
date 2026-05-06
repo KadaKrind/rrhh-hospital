@@ -18,6 +18,7 @@ public class EmpleadosController : ControllerBase
         var empleados = await _db.Empleados
             .Where(e => e.Estado == "Activo")
             .Select(e => new {
+                e.Id,
                 e.CodigoEmpleado,
                 e.Ci,
                 e.Nombre,
@@ -91,4 +92,6 @@ public class EmpleadosController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { mensaje = "Empleado desactivado correctamente." });
     }
+
+
 }

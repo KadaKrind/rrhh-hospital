@@ -18,6 +18,7 @@ public class DepartamentosController : ControllerBase
         var departamentos = await _db.Departamentos
             .Where(d => d.Estado == "Activo")
             .Select(d => new {
+                d.Id,
                 d.CodigoDepartamento,
                 d.Nombre
             }).ToListAsync();
