@@ -52,6 +52,10 @@ public class EmpleadosController : ControllerBase
         bool existe = await _db.Empleados.AnyAsync(e => e.CodigoEmpleado == empleado.CodigoEmpleado);
         if (existe) return Conflict(new { mensaje = "Ya existe un empleado con ese código." });
 
+        // Fix DateTime UTC para PostgreSQL
+        empleado.FechaIngreso = DateTime.SpecifyKind(empleado.FechaIngreso, DateTimeKind.Utc);
+        empleado.FechaContratacion = DateTime.SpecifyKind(empleado.FechaContratacion, DateTimeKind.Utc);
+
         empleado.Estado = "Activo";
         _db.Empleados.Add(empleado);
         await _db.SaveChangesAsync();
@@ -69,7 +73,8 @@ public class EmpleadosController : ControllerBase
         emp.Ci = datos.Ci;
         emp.Nombre = datos.Nombre;
         emp.Apellido = datos.Apellido;
-        emp.FechaContratacion = datos.FechaContratacion;
+        // Fix DateTime UTC para PostgreSQL
+        emp.FechaContratacion = DateTime.SpecifyKind(datos.FechaContratacion, DateTimeKind.Utc);
         emp.SalarioBase = datos.SalarioBase;
 
         await _db.SaveChangesAsync();
